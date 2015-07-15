@@ -1,6 +1,10 @@
 --Query 5
 CREATE DATABASE Organisation;
 
+USE Organisation;
+
+GO
+
 --Query 6,7,8,9,10,12,13
 
 CREATE TABLE Employee
@@ -85,10 +89,10 @@ VALUES(1005,'Software Engineer');
 SELECT * FROM Designation;
 
 ALTER TABLE Employee
-ALTER COLUMN Designation int;
+ADD DesignationId int;
   
 ALTER TABLE Employee 
-ADD FOREIGN KEY(Designation)
+ADD FOREIGN KEY(DesignationId)
 REFERENCES Designation(DesignationId);
 
 --Query 17
@@ -108,14 +112,14 @@ SELECT FirstName AS Name FROM Employee;
 CREATE TABLE EmployeeSlab
 (
   EmployeeId INT PRIMARY KEY,
-  Name VARCHAR(50) NOT NULL UNIQUE,
+  Name VARCHAR(50) NOT NULL
 );
 
-INSERT INTO Employee
+INSERT INTO EmployeeSlab
 VALUES(101,'Nipun Chawla');
-INSERT INTO Employee
+INSERT INTO EmployeeSlab
 VALUES(102,'Rishabh Sethi');
-INSERT INTO Employee
+INSERT INTO EmployeeSlab
 VALUES(103,'Swati Gakhar');
 
 SELECT * FROM Employee JOIN EmployeeSlab
@@ -130,18 +134,43 @@ ON Employee.EmployeeId=EmployeeSlab.EmployeeId;
 
 --Query 22
 
-SELECT * FROM Employee LEFT OUTER JOIN EmployeeSlab
-ON Employee.EmployeeId=EmployeeSlab.EmployeeId;
+CREATE TABLE Department
+(
+  DepartmentId INT PRIMARY KEY,
+  EmployeeId INT,
+  DepartmentName VARCHAR(50) NOT NULL,
+);
+
+INSERT INTO Department
+VALUES(1001,101,'IT');
+INSERT INTO Department
+VALUES(1002,102,'');
+INSERT INTO Department
+VALUES(1003,103,'CS');
+INSERT INTO Department
+VALUES(1004,104,'CS');
+INSERT INTO Department
+VALUES(1005,105,'HR');
+
+DELETE FROM Department WHERE EmployeeId=105;
+DELETE FROM Department WHERE EmployeeId=102;
+
+
+SELECT Employee.FirstName,Department.DepartmentName FROM Employee 
+LEFT OUTER JOIN Department
+ON Employee.EmployeeId=Department.EmployeeId;
 
 --Query 23
 
-SELECT * FROM Employee RIGHT OUTER JOIN EmployeeSlab
-ON Employee.EmployeeId=EmployeeSlab.EmployeeId;
+SELECT Employee.FirstName,Department.DepartmentName FROM Employee 
+RIGHT OUTER JOIN Department
+ON Employee.EmployeeId=Department.EmployeeId;
 
 --Query 24
 
-SELECT * FROM Employee FULL OUTER JOIN EmployeeSlab
-ON Employee.EmployeeId=EmployeeSlab.EmployeeId;
+SELECT Employee.FirstName,Department.DepartmentName FROM Employee 
+FULL OUTER JOIN Department
+ON Employee.EmployeeId=Department.EmployeeId;
 
 --Query 25
 
@@ -226,11 +255,15 @@ SELECT * FROM XYZ;
 
 --Query 26
 
-SELECT * INTO Employee_Backup IN 'Another.mdb' FROM Employee;
+CREATE DATABASE Another;
+
+SELECT * INTO Employee_Backup IN 'Another' FROM Employee;
 
 --Query 27
 
 UPDATE Employee SET Salary = Salary+5000;
+
+SELECT * FROM Employee;
 
 --Query 28
 
@@ -238,42 +271,210 @@ ALTER TABLE Employee
 ADD DateOfJOINING DATE;
 
 CREATE VIEW DetailView AS 
-SELECT DateOfJoining  FROM Employee
+SELECT FirstName,LastName,DateOfJOINING,Salary  FROM Employee
 WHERE Salary > 60000;
+
+SELECT * FROM DetailView;
+
+--Query 29
+
+
+SELECT  LEFT(DATENAME(WEEKDAY,GETDATE()),3)+' '
++LEFT(DATENAME(DAY,GETDATE()),2)+'th'+' '
++LEFT(DATENAME(MONTH,GETDATE()),3)+' '
++RIGHT(DATENAME(YEAR,GETDATE()),2)+','+' '
++LEFT(DATENAME(HOUR,GETDATE()),2)+':'
++LEFT(DATENAME(MINUTE,GETDATE()),2)+' '+'pm' AS CurrentDate;
+
+SELECT LEFT(DATENAME(WEEKDAY,DATEADD(DAY,2,GETDATE())),3)+' '
++LEFT(DATENAME(DAY,DATEADD(DAY,2,GETDATE())),2)+'th'+' '
++LEFT(DATENAME(MONTH,DATEADD(DAY,2,GETDATE())),3)+' '
++RIGHT(DATENAME(YEAR,DATEADD(DAY,2,GETDATE())),2)+','+' '
++LEFT(DATENAME(HOUR,DATEADD(DAY,2,GETDATE())),2)+':'
++LEFT(DATENAME(MINUTE,DATEADD(DAY,2,GETDATE())),2)+' '+'pm'
+ AS CurrentDateAdd2;
 
 --Query 30
 
-CREATE TABLE Employee
-(
-  EmployeeId INT PRIMARY KEY,
-  FirstName VARCHAR(50) NOT NULL UNIQUE,
-  LastName VARCHAR(50) NOT NULL,
-  Gender CHARACTER(1),
-  Active BIT DEFAULT 'true',
-  Salary INT,
-  Designation VARCHAR(50),
-  HalfYearlyGrade INT,
-  Age INT CHECK(Age>20)
-);
-
-INSERT INTO Employee
-VALUES(101,'Nipun','Chawla','M','true',25000,'Trainee',1,22);
-INSERT INTO Employee
-VALUES(102,'Rishabh','Sethi','M','false',35000,'Software Enineer',2,28);
-INSERT INTO Employee
-VALUES(103,'Swati','Gakhar','F','true',45000,'Software Enineer',2,34);
-INSERT INTO Employee
-VALUES(104,'Aastha','Sharma','F','true',55000,'Software Enineer',3,40);
-INSERT INTO Employee
-VALUES(105,'Vaishali','Taneja','F','false','','Software Enineer',3,45);
+UPDATE Employee 
+SET Salary='' WHERE FirstName='Nipun';
 
 SELECT SUM(ISNULL(Salary,0)) FROM Employee;
 
+--Query 31
+
+UPDATE Employee
+SET Gender=null WHERE FirstName='Vaishali';
+
+SELECT * FROM Employee WHERE Gender IS NULL;
+
+--Query 32
+
+ALTER TABLE Employee
+ADD Pf int;
+
+UPDATE Employee
+SET Pf = Salary*.1275;
+
+SELECT ROUND(Pf,2) FROM Employee;
+
+--Query 34
+
+SELECT * FROM Employee
+WHERE Salary > (SELECT AVG(Salary) FROM Employee);
+
+--Query 35
+
+SELECT Department.DepartmentName,COUNT(Employee.EmployeeId) 
+AS NumberOfEmployee FROM Employee
+JOIN Department
+ON Employee.EmployeeId=Department.EmployeeId
+GROUP BY DepartmentName;
+
+--Query 36
+
+SELECT * FROM Employee
+WHERE Salary < (SELECT MAX(Salary) FROM Employee); 
+
+--Query 37
+
+SELECT * FROM Employee
+WHERE Salary < (SELECT MIN(Salary) FROM Employee); 
+
+--Query 38
+
+SELECT SUM(Salary) FROM Employee;
+
+--Query 39
+
+SELECT Department.DepartmentName,COUNT(Employee.EmployeeId) 
+AS NumberOfEmployee FROM Employee
+JOIN Department
+ON Employee.EmployeeId=Department.EmployeeId
+GROUP BY DepartmentName;
+
+--Query 41
+
+SELECT FirstName,UPPER(LastName) FROM Employee;
+
+--Query 42
+
+SELECT FirstName,LOWER(LastName) FROM Employee;
+
+--Query 43
+
+SELECT LEN(FirstName) AS Length FROM Employee;
+
+--Query 44
+
+CREATE TABLE EmployeeSalary
+(
+  EmployeeSalary INT,
+  EmployeeName VARCHAR(50) NOT NULL
+);
+
+INSERT INTO EmployeeSalary
+VALUES(25000.99,'Nipun');
+INSERT INTO EmployeeSalary
+VALUES(35000.89,'Rishabh');
+INSERT INTO EmployeeSalary
+VALUES(45000,'Swati');
+INSERT INTO EmployeeSalary
+VALUES(55000.50,'Aastha');
+INSERT INTO EmployeeSalary
+VALUES(65000,'Vaishali');
+
+SELECT EmployeeName,ROUND(EmployeeSalary,0) FROM EmployeeSalary;
+
+--Query 45
+
+SELECT *,GETDATE() AS CurrentDate FROM Employee;
+
+--Query 46
+
+SELECT FirstName,Salary,CONVERT(VARCHAR(20),GETDATE(),105) AS Today,
+CONVERT(VARCHAR(19),GETDATE(),0) AS Today,
+CONVERT(VARCHAR(10),GETDATE(),10) AS Today,
+CONVERT(VARCHAR(10),GETDATE(),110) AS Today,
+CONVERT(VARCHAR(11),GETDATE(),6) AS Today,
+CONVERT(VARCHAR(11),GETDATE(),106) AS Today,
+CONVERT(VARCHAR(24),GETDATE(),113) AS Today FROM Employee;
+
+--Query 47
+
+SELECT CAST(EmployeeId AS VARCHAR(10)) AS EmpId FROM Employee;
+
+--Query 48
+
+SELECT CASE
+		WHEN Salary>=50000 AND Age<35 THEN 'Yes'
+		ELSE 'No'
+		END
+FROM Employee;
 
 
+--Query 49
 
+SELECT * FROM (SELECT FirstName,LastName,Salary,RANK()
+OVER(ORDER BY Salary DESC) AS Rank FROM Employee) 
+AS Temp  WHERE Temp.Rank < 4;
 
+SELECT * FROM (SELECT FirstName,LastName,Salary,ROW_NUMBER()
+OVER(ORDER BY Salary DESC) AS AlternateRank FROM Employee) 
+AS Temp  WHERE Temp.AlternateRank %2 = 1;
 
+--Query 50
+
+WITH EmployeeCTE (FirstName,LastName,Salary)
+AS(SELECT FirstName,LastName,Salary FROM Employee)
+SELECT * FROM EmployeeCTE;
+
+--Query 51
+
+SELECT Department.DepartmentName,COUNT(Employee.EmployeeId)
+AS NumberOfEmployee,SUM(Salary) 
+FROM Employee
+JOIN Department
+ON Employee.EmployeeId=Department.EmployeeId
+GROUP BY DepartmentName,Employee.EmployeeId WITH ROLLUP;
+
+SELECT Department.DepartmentName,COUNT(Employee.EmployeeId)
+AS NumberOfEmployee,SUM(Salary) 
+FROM Employee
+JOIN Department
+ON Employee.EmployeeId=Department.EmployeeId
+GROUP BY DepartmentName,Employee.EmployeeId WITH CUBE;
+
+--Query 52
+
+ALTER TABLE Employee
+ADD Experience int;
+
+UPDATE Employee
+SET Experience = 3 WHERE EmployeeId = 101;
+UPDATE Employee
+SET Experience = 5 WHERE EmployeeId = 102;
+UPDATE Employee
+SET Experience = 7 WHERE EmployeeId = 103;
+UPDATE Employee
+SET Experience = 9 WHERE EmployeeId = 104;
+UPDATE Employee
+SET Experience = 11 WHERE EmployeeId = 105;
+
+SELECT * FROM Employee
+INTERSECT
+SELECT * FROM Employee WHERE Experience < 6;
+
+SELECT * FROM Employee
+EXCEPT
+SELECT * FROM Employee WHERE Experience >= 6;
+
+--Query 53
+
+SELECT FirstName,Salary,ROW_NUMBER()OVER(ORDER BY Salary) AS Row,(
+SELECT 
+COUNT(*) AS CountRow FROM Employee) as C from Employee
+WHERE Row > c.CountRow-3;
 
 
 
