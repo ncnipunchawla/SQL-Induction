@@ -90,12 +90,9 @@ CONVERT(VARCHAR(20),MAX(TransactionDate), 105) AS LastTransactionDate,
 SUM(CASE WHEN TransactionType='Order' THEN TransactionAmount*TProductMaster.CostPerItem
 	ELSE -TransactionAmount
 	END) AS Balance
-	
 FROM TTransaction
 JOIN TProductMaster
 ON TProductMaster.ProductId=TTransaction.ProductId
-JOIN TUserMaster
-ON TUserMaster.UserId=TTransaction.UserId
 GROUP BY TTransaction.UserId,TTransaction.ProductId)
 AS S
 JOIN TProductMaster
