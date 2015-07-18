@@ -19,6 +19,7 @@ VALUES('OPT20110105','Manmohan','','Singh','1983-02-10','2010-05-25');
 INSERT INTO TEmp(EmpCode,EmpFName,EmpMName,EmpLName,EmpDOB,EmpDOJ)
 VALUES('OPT20110105','Alfred','Joseph','Lawrence','1988-02-28','2011-06-24');
 
+
 SELECT * FROM TEmp;
 
 --Table2
@@ -67,7 +68,7 @@ INSERT INTO TAtten(EmpId,ActivityId,AttenStartTime,AttenEndHrs)
 VALUES(1003,5,'2011/2/19 10:00:00',7);
 
 
-SELECT * FROM TAtten
+SELECT * FROM TAtten;
 
 
 --Table 4
@@ -108,7 +109,8 @@ WHERE S.DateOfBirth IS NOT NULL
 --Question2
 
 SELECT EmpFName+' '+EmpMName+' '+EmpLName AS Name,
-Increment,PreviousSalary,CurrentSalary, TotalWorkedHours
+Increment,PreviousSalary,CurrentSalary, TotalWorkedHours,
+Sub2.ActivityId AS LastWorkedId, Sub2.AttenEndHrs AS LastHourWorked
 FROM(
 SELECT EmpId,
 CASE
@@ -126,19 +128,17 @@ FROM TSalary
 GROUP BY EmpId) AS Subquery1
 JOIN
 (
-SELECT EmpId,
-SUM(AttenEndHrs)AS TotalWorkedHours
+SELECT EmpId,SUM(AttenEndHrs)AS TotalWorkedHours
 FROM TAtten
 GROUP BY EmpId
 ) AS Subquery2
 ON Subquery1.EmpId=Subquery2.EmpId
 JOIN TEmp
 ON TEmp.EmpId=Subquery1.EmpId
-
-
-
-
-
+JOIN(SELECT Sub1.EmpId,ActivityId,AttenEndHrs FROM TAtten AS Sub1
+LEFT JOIN (SELECT EmpId, MAX(AttenStartTime)m  FROM TAtten GROUP BY EmpId)AS Sub
+ON Sub.EmpId=Sub1.EmpId WHERE Sub1.AttenStartTime=Sub.m)Sub2
+ON Sub2.EmpId=TEmp.EmpId
 
 
 
