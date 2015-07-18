@@ -126,18 +126,25 @@ END AS PreviousSalary,
 MAX(NewSalary) AS CurrentSalary
 FROM TSalary
 GROUP BY EmpId) AS Subquery1
+
+JOIN TEmp
+ON TEmp.EmpId=Subquery1.EmpId
+
 JOIN
 (
-SELECT EmpId,SUM(AttenEndHrs)AS TotalWorkedHours
+SELECT EmpId, SUM(AttenEndHrs)AS TotalWorkedHours
 FROM TAtten
 GROUP BY EmpId
 ) AS Subquery2
 ON Subquery1.EmpId=Subquery2.EmpId
-JOIN TEmp
-ON TEmp.EmpId=Subquery1.EmpId
-JOIN(SELECT Sub1.EmpId,ActivityId,AttenEndHrs FROM TAtten AS Sub1
-LEFT JOIN (SELECT EmpId, MAX(AttenStartTime)m  FROM TAtten GROUP BY EmpId)AS Sub
-ON Sub.EmpId=Sub1.EmpId WHERE Sub1.AttenStartTime=Sub.m)Sub2
+
+
+JOIN  (SELECT Sub1.EmpId,ActivityId,AttenEndHrs 
+       FROM TAtten AS Sub1
+	   JOIN (SELECT EmpId, MAX(AttenStartTime)m  
+	   FROM TAtten GROUP BY EmpId)AS Sub
+	   ON Sub.EmpId=Sub1.EmpId 
+	   WHERE Sub1.AttenStartTime=Sub.m) AS Sub2
 ON Sub2.EmpId=TEmp.EmpId
 
 
