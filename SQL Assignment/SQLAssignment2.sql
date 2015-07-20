@@ -110,7 +110,7 @@ WHERE S.DateOfBirth IS NOT NULL
 
 SELECT EmpFName+' '+EmpMName+' '+EmpLName AS Name,
 Increment,PreviousSalary,CurrentSalary, TotalWorkedHours,
-Sub2.ActivityId AS LastWorkedId, Sub2.AttenEndHrs AS LastHourWorked
+ActivityDescription AS LastWorkedName, Sub2.AttenEndHrs AS LastHourWorked
 FROM(
 SELECT EmpId,
 CASE
@@ -146,6 +146,9 @@ JOIN  (SELECT Sub1.EmpId,ActivityId,AttenEndHrs ,AttenStartTime
 	   ON Sub.EmpId=Sub1.EmpId 
 	   WHERE Sub1.AttenStartTime=Sub.m) AS Sub2
 ON Sub2.EmpId=TEmp.EmpId
+JOIN TActivity
+ON TActivity.ActivityId=Sub2.ActivityId
+
 
 
 
