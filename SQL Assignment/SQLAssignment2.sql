@@ -139,7 +139,7 @@ GROUP BY EmpId
 ON Subquery1.EmpId=Subquery2.EmpId
 
 
-JOIN  (SELECT Sub1.EmpId,ActivityId,AttenEndHrs 
+JOIN  (SELECT Sub1.EmpId,ActivityId,AttenEndHrs ,AttenStartTime
        FROM TAtten AS Sub1
 	   JOIN (SELECT EmpId, MAX(AttenStartTime)m  
 	   FROM TAtten GROUP BY EmpId)AS Sub

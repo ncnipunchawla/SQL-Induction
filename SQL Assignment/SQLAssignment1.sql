@@ -68,10 +68,8 @@ FROM TTransaction;
 
 --Assignment Query
 
-SELECT TUserMaster.UserName, TProductMaster.ProductName,
-OrderedQuantity, AmountPaid, LastTransactionDate, Balance 
-FROM 
-(SELECT TTransaction.UserId,TTransaction.ProductId,
+SELECT MAX(TUserMaster.UserName) AS UserName,
+MAX(TProductMaster.ProductName)AS ProductName,
 SUM(
 CASE 
 WHEN TransactionType='Order'
@@ -93,9 +91,6 @@ SUM(CASE WHEN TransactionType='Order' THEN TransactionAmount*TProductMaster.Cost
 FROM TTransaction
 JOIN TProductMaster
 ON TProductMaster.ProductId=TTransaction.ProductId
-GROUP BY TTransaction.UserId,TTransaction.ProductId)
-AS S
-JOIN TProductMaster
-ON TProductMaster.ProductId=S.ProductId
 JOIN TUserMaster
-ON TUserMaster.UserId=S.UserId;
+ON TUserMaster.UserId=TTransaction.UserId
+GROUP BY TTransaction.UserId,TTransaction.ProductId
