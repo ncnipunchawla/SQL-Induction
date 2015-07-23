@@ -1,0 +1,179 @@
+CREATE DATABASE SQLTest;
+
+
+--Vendor Table
+
+CREATE TABLE TVendor (
+VendorId INT PRIMARY KEY,
+VendorName VARCHAR(20)
+);
+
+INSERT INTO TVendor VALUES(101,'Sai Travels');
+INSERT INTO TVendor VALUES(102,'Meru Cabs');
+INSERT INTO TVendor VALUES(103,'Miracle Cabs');
+
+SELECT * FROM TVendor;
+
+--Cab Table
+
+CREATE TABLE TCab (
+CabId INT PRIMARY KEY,
+VendorId INT FOREIGN KEY REFERENCES TVendor(VendorId),
+CabNumber VARCHAR(10),
+CabBrandName VARCHAR(20)
+);
+
+INSERT INTO TCab VALUES(201,101,'8529','Mercedes');
+INSERT INTO TCab VALUES(202,103,'5764','Jaguar');
+INSERT INTO TCab VALUES(203,101,'1967','Lamborghini');
+INSERT INTO TCab VALUES(204,102,'7359','Mercedes');
+INSERT INTO TCab VALUES(205,103,'1992','Audi');
+INSERT INTO TCab VALUES(206,103,'0786','BMW');
+INSERT INTO TCab VALUES(207,101,'0007','Audi');
+INSERT INTO TCab VALUES(208,102,'8541','Fiat');
+
+SELECT * FROM TCab;
+
+--User Table
+
+CREATE TABLE TUser (
+UserId INT PRIMARY KEY,
+UserName VARCHAR(20),
+UserGender VARCHAR(2)
+);
+
+INSERT INTO TUser VALUES(301,'Ravi','M');
+INSERT INTO TUser VALUES(302,'Kavi','F');
+INSERT INTO TUser VALUES(303,'Abhi','M');
+INSERT INTO TUser VALUES(304,'Savita','F');
+INSERT INTO TUser VALUES(305,'Gopal','M');
+INSERT INTO TUser VALUES(306,'Bhopal','M');
+INSERT INTO TUser VALUES(307,'Dolly','F');
+INSERT INTO TUser VALUES(308,'Tanu','F');
+INSERT INTO TUser VALUES(309,'Prince','M');
+INSERT INTO TUser VALUES(310,'RAj Kishore','M');
+
+SELECT * FROM TUser;
+
+--Booking Table
+
+
+CREATE TABLE TBooking (
+BookingId INT PRIMARY KEY,
+CabId INT FOREIGN KEY REFERENCES TCab(CabId),
+UserId INT FOREIGN KEY REFERENCES TUser(UserId),
+Fare INT NOT NULL,
+Distance FLOAT NOT NULL,
+PickupTime DATETIME,
+DropTime DATETIME,
+Rating INT
+);
+
+INSERT INTO TBooking VALUES(401,204,309,101,13,'2015-04-07 19:00:00','2015-04-07 19:30:00',5);
+INSERT INTO TBooking VALUES(402,205,301,105,15.2,'2015-05-11 9:15:00','2015-05-11 10:00:00',3);
+INSERT INTO TBooking VALUES(403,204,309,2000,190,'2015-03-19 20:45:00','2015-03-20 01:00:00',2);
+INSERT INTO TBooking VALUES(404,201,302,1995,150,'2015-07-07 11:00:00','2015-07-07 15:30:00',5);
+INSERT INTO TBooking VALUES(405,204,303,553,50,'2014-09-12 19:00:00','2014-09-12 22:15:00',2);
+INSERT INTO TBooking VALUES(406,202,302,465,45,'2015-01-07 9:00:00','2015-01-07 9:40:00',1);
+INSERT INTO TBooking VALUES(407,205,304,258,20,'2015-07-02 3:00:00','2015-07-02 3:15:00',4);
+INSERT INTO TBooking VALUES(408,202,309,125,15,'2015-06-23 9:00:00','2015-06-23 10:30:00',5);
+INSERT INTO TBooking VALUES(409,204,310,1462,30,'2015-02-05 6:00:00','2015-02-05 8:00:00',4);
+INSERT INTO TBooking VALUES(410,207,306,1876,60,'2015-01-29 15:00:00','2015-01-29 18:00:00',1);
+INSERT INTO TBooking VALUES(411,203,308,1145,100,'2015-06-04 20:00:00','2015-06-05 6:00:00',0);
+INSERT INTO TBooking VALUES(412,206,309,1358,90,'2015-01-19 02:00:00','2015-01-19 08:00:00',1);
+INSERT INTO TBooking VALUES(413,208,301,102,5,'2015-03-21 11:00:00','2015-03-21 11:15:00',5);
+INSERT INTO TBooking VALUES(414,206,309,503,50,'2015-02-28 08:00:00','2015-02-28 10:00:00',4);
+INSERT INTO TBooking VALUES(415,204,304,786,62,'2015-03-09 16:00:00','2015-03-09 19:00:00',3);
+INSERT INTO TBooking VALUES(416,208,306,143,3,'2015-04-09 11:30:00','2015-04-09 11:45:00',2);
+INSERT INTO TBooking VALUES(417,203,309,658,12,'2015-05-04 01:00:00','2015-05-04 01:45:00',0);
+INSERT INTO TBooking VALUES(418,206,308,852,17,'2015-02-18 15:00:00','2015-02-18 16:00:00',1);
+INSERT INTO TBooking VALUES(419,208,301,450,22,'2015-03-11 18:00:00','2015-03-12 10:00:00',4);
+INSERT INTO TBooking VALUES(420,204,309,420,29,'2015-02-17 11:00:00','2015-02-17 21:00:00',1);
+
+SELECT * FROM TBooking;
+--Question 1
+
+SELECT UserName,CabBrandName,CabNumber,TravelTime FROM(
+SELECT UserName,Fare,CabId,TravelTime FROM(
+SELECT UserId,CabId,Fare,DATEDIFF(MI,PickupTime,DropTime)AS TravelTime FROM TBooking
+WHERE Fare >= 500 AND Fare <= 1000)AS Subquery1
+JOIN TUser
+ON TUser.UserId=Subquery1.UserId)AS Subquery2
+JOIN TCab
+ON TCab.CabId=Subquery2.CabId;
+
+--Question 2
+
+SELECT CabNumber,CabBrandName FROM(
+SELECT CabId,RANK()OVER(ORDER BY COUNT(CabId) DESC)AS Ranking FROM TBooking GROUP BY CabId)AS Subquery1
+JOIN TCab
+ON TCab.CabId=Subquery1.CabId
+WHERE Ranking = 1;
+
+--Question 3
+
+SELECT UserName from(
+SELECT UserId,RANK()OVER(ORDER BY COUNT(CabId) DESC)AS Ranking FROM TBooking GROUP BY UserId)AS Subquery1
+JOIN TUser
+ON TUser.UserId=Subquery1.UserId
+WHERE Ranking < 4;
+
+--Question 4
+
+SELECT UserName,VendorName,NumOfTimes FROM TVendor JOIN (
+SELECT UserName,VendorId,TCab.CabId,NumOfTimes FROM TCab JOIN(
+SELECT UserName,TUser.UserId,CabId,NumOfTimes FROM(
+SELECT UserId,CabId,COUNT(CabId)AS NumOfTimes FROM TBooking
+GROUP BY UserId,CabId)AS Subquery1
+JOIN TUser
+ON TUser.UserId=Subquery1.UserId)AS Subquery2
+ON TCab.CabId=Subquery2.CabId)AS Subquery3
+ON Subquery3.VendorId=TVendor.VendorId;
+
+
+--Question 5
+
+SELECT CabBrandName,CabNumber,UserGender FROM(
+SELECT CabId,UserGender FROM TBooking
+JOIN TUser
+ON TUser.UserId=TBooking.UserId
+GROUP BY CabId,UserGender)AS Subquery1
+JOIN TCab
+ON TCab.CabId=Subquery1.CabId
+
+--Question 6
+
+SELECT VendorId,SUM(AverageRatingCab)/COUNT(VendorId)AS Total FROM TCab JOIN
+(SELECT CabId,COUNT(CabId)AS Counting,SUM(Rating)/COUNT(CabId)AS AverageRatingCab 
+FROM TBooking GROUP BY CabId)AS Subquery1
+ON TCab.CabId=Subquery1.CabId
+GROUP BY VendorId
+
+
+--Question 7
+
+SELECT CabBrandName,VendorName,TotalDistance,AverageSpeed FROM(
+SELECT CabBrandName,TotalDistance,AverageSpeed,VendorId FROM(
+SELECT CabId,SUM(Distance)AS TotalDistance,
+SUM(Distance)/SUM(DATEDIFF(HH,PickupTime,DropTime))AS AverageSpeed
+FROM TBooking GROUP BY CabId)AS Subquery1
+JOIN TCab
+ON TCab.CabId=Subquery1.CabId)AS Subquery2
+JOIN TVendor
+ON Subquery2.VendorId=TVendor.VendorId
+
+--Question 8
+
+SELECT VendorId,COUNT(TCab.CabId)AS NumOfBookedCabs FROM TCab JOIN(
+SELECT CabId,CONVERT(DATE, PickupTime)AS Booking FROM TBooking
+WHERE CONVERT(DATE, PickupTime) = '2015-04-07')AS Subquery1
+ON Subquery1.CabId=TCab.CabId
+GROUP BY VendorId;
+
+--Question 9
+
+SELECT TCab.CabId,CabBrandName,CabNumber FROM TCab JOIN(
+SELECT CabId,RANK()OVER(ORDER BY SUM(Fare)/SUM(Distance))AS Ranking FROM TBooking
+GROUP BY CabId)AS Subquery1
+ON Subquery1.CabId= TCab.CabId
+WHERE Ranking=1;
